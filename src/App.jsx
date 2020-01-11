@@ -1,6 +1,8 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useRef } from "react";
+import { Button, Menu } from 'antd';
 import fse from "fs-extra";
 import { remote } from "electron";
+import Drawer from "./Components/Drawer"
 
 const paths = ["images", "masks", "prev_images", "prev_masks"];
 
@@ -11,12 +13,21 @@ const dialogOptions = {
 };
 
 function App() {
-  const [filesName, setFilesName] = useState([]);
+  const canvas = useRef();
+  const [isloaded, setIsLoaded] = useState(false);
+  const [filesName, setFilesName] = useState();
+  const [path, setPath] = useState();
 
-  const proLoad = folderPath => {
+  const undo = () => 
+    (canvas.current.undo())
+
+  const proLoad = (folderPath, files) => {
     console.log(true);
     console.log(folderPath);
-    console.log(filesName);
+    console.log(files);
+    setFilesName(files);
+    setPath(folderPath);
+    setIsLoaded(true);
   };
 
   const proCreate = folderPath => {
@@ -60,9 +71,26 @@ function App() {
   }, [proLoad]);
 
   return (
-    <div>
-      <button onClick={fileLoad}>폴더를 불러오세요!</button>
-    </div>
+    <>
+      <Menu mode="horizontal">
+        <Menu.Item disabled>
+          <Button type="primary" onClick={fileLoad}>
+          Load File
+          </Button>
+        &nbsp;
+          <Button type="primary" onClick={undo}>
+            Undo
+          </Button>
+        </Menu.Item>
+      </Menu>
+      {
+        isloaded ?
+          <Drawer canvas={canvas} imgfilename={filesName} path={path} /> : 
+          <div>
+            <span>로딩 전</span>
+          </div>
+      }
+    </>
   );
 }
 
