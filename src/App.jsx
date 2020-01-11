@@ -2,6 +2,7 @@ import React, { useState, useCallback, useRef } from "react";
 import { Button, Menu } from 'antd';
 import fse from "fs-extra";
 import { remote } from "electron";
+import toBuffer from "blob-to-buffer"
 import Drawer from "./Components/Drawer"
 
 const paths = ["images", "masks", "prev_images", "prev_masks"];
@@ -21,10 +22,18 @@ function App() {
   const undo = () => 
     (canvas.current.undo())
 
+  const save = () => 
+    (canvas.current.canvas.drawing.toBlob((blob) =>
+      toBuffer(blob, (err, buff) =>
+        {
+          fse.outputFile("C:/Users/Mocha/Documents/아무튼 귀여워 28화_mproj/masks/aaa.png", buff,
+          err => { if (err) throw err }
+          );
+        }
+      ), 'image/png'
+    ));
+
   const proLoad = (folderPath, files) => {
-    console.log(true);
-    console.log(folderPath);
-    console.log(files);
     setFilesName(files);
     setPath(folderPath);
     setIsLoaded(true);
@@ -75,11 +84,15 @@ function App() {
       <Menu mode="horizontal">
         <Menu.Item disabled>
           <Button type="primary" onClick={fileLoad}>
-          Load File
+            Load File
           </Button>
         &nbsp;
           <Button type="primary" onClick={undo}>
             Undo
+          </Button>
+        &nbsp;
+          <Button type="primary" onClick={save}>
+            Save
           </Button>
         </Menu.Item>
       </Menu>
